@@ -41,5 +41,4 @@ router.post('/evaluate', async (req: Request, res: Response) => {
     res.status(502).json({ success: false, error: message });
   }
 });
-
 export default router;
