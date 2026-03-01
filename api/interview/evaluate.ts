@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { evaluateInterview, type EvaluateAnswerItem } from '../lib/deepseek';
+import { evaluateInterview, type EvaluateAnswerItem } from '../lib/deepseek.js';
 
 function validateBody(body: unknown): body is { answers: EvaluateAnswerItem[] } {
   if (!body || typeof body !== 'object') return false;
