@@ -108,6 +108,28 @@ export default function ResultPage() {
                   </p>
                 </div>
               )}
+              {resultType === 'transfer' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <i className="ri-arrow-left-right-line text-2xl text-blue-600"></i>
+                    <h2 className="text-2xl font-semibold text-blue-900">建议转岗</h2>
+                  </div>
+                  <p className="text-blue-800 leading-relaxed">
+                    当前岗位匹配度一般,但你的能力画像更适合其他方向。系统已为你推荐更匹配的岗位,可在下方「其他适合你的岗位」中查看并一键转投。
+                  </p>
+                </div>
+              )}
+              {resultType === 'review' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <i className="ri-question-line text-2xl text-amber-600"></i>
+                    <h2 className="text-2xl font-semibold text-amber-900">待复核</h2>
+                  </div>
+                  <p className="text-amber-800 leading-relaxed">
+                    本次评估证据处于灰区,建议由面试官人工复核。你的部分回答较简略或存在网络异常记录,补充说明或重新作答可能有助于更准确评估。
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

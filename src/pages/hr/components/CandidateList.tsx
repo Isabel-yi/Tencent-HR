@@ -1,109 +1,14 @@
-
 import { useState } from 'react';
+import type { Candidate, StatusType } from '../data/candidates';
 
 interface CandidateListProps {
+  candidates: Candidate[];
   onSelectCandidate: (id: string) => void;
 }
 
-type StatusType = 'recommend' | 'uncertain' | 'transfer';
-
-interface Candidate {
-  id: string;
-  name: string;
-  position: string;
-  status: StatusType;
-  matchRange: string;
-  riskFlags: string[];
-  interviewDate: string;
-  score: number;
-}
-
-export default function CandidateList({ onSelectCandidate }: CandidateListProps) {
+export default function CandidateList({ candidates, onSelectCandidate }: CandidateListProps) {
   const [filterStatus, setFilterStatus] = useState<StatusType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const candidates: Candidate[] = [
-    {
-      id: '1',
-      name: '张伟',
-      position: '产品经理',
-      status: 'recommend',
-      matchRange: '75-85%',
-      riskFlags: [],
-      interviewDate: '2025-01-15',
-      score: 82
-    },
-    {
-      id: '2',
-      name: '李娜',
-      position: '前端工程师',
-      status: 'recommend',
-      matchRange: '80-90%',
-      riskFlags: [],
-      interviewDate: '2025-01-15',
-      score: 88
-    },
-    {
-      id: '3',
-      name: '王强',
-      position: '数据分析师',
-      status: 'uncertain',
-      matchRange: '55-65%',
-      riskFlags: ['回答过短'],
-      interviewDate: '2025-01-14',
-      score: 62
-    },
-    {
-      id: '4',
-      name: '刘芳',
-      position: '产品经理',
-      status: 'transfer',
-      matchRange: '60-70%',
-      riskFlags: [],
-      interviewDate: '2025-01-14',
-      score: 68
-    },
-    {
-      id: '5',
-      name: '陈明',
-      position: '后端工程师',
-      status: 'recommend',
-      matchRange: '78-88%',
-      riskFlags: [],
-      interviewDate: '2025-01-13',
-      score: 85
-    },
-    {
-      id: '6',
-      name: '赵丽',
-      position: 'UI设计师',
-      status: 'uncertain',
-      matchRange: '50-60%',
-      riskFlags: ['网络异常'],
-      interviewDate: '2025-01-13',
-      score: 58
-    },
-    {
-      id: '7',
-      name: '孙浩',
-      position: '运营专员',
-      status: 'transfer',
-      matchRange: '65-75%',
-      riskFlags: [],
-      interviewDate: '2025-01-12',
-      score: 72
-    },
-    {
-      id: '8',
-      name: '周敏',
-      position: '产品经理',
-      status: 'recommend',
-      matchRange: '82-92%',
-      riskFlags: [],
-      interviewDate: '2025-01-12',
-      score: 90
-    }
-  ];
 
   const getStatusConfig = (status: StatusType) => {
     const configs = {

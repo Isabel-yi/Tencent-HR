@@ -20,7 +20,7 @@ export function AppRoutes() {
   const navigate = useNavigate();
   useEffect(() => {
     window.REACT_APP_NAVIGATE = navigate;
-    navigateResolver(window.REACT_APP_NAVIGATE);
-  });
+    navigateResolver(navigate);
+  }, [navigate]);
   return element;
 }

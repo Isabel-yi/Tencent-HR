@@ -1,54 +1,55 @@
-
 import { useState } from 'react';
+import type { Candidate, StatusType } from '../data/candidates';
 
 interface CandidateDetailProps {
+  candidates: Candidate[];
   candidateId: string;
   onBack: () => void;
 }
 
-export default function CandidateDetail({ candidateId, onBack }: CandidateDetailProps) {
+const statusConfig: Record<StatusType, { label: string; color: string; icon: string }> = {
+  recommend: {
+    label: '推荐进入二面',
+    color: 'bg-teal-100 text-teal-700 border-teal-200',
+    icon: 'ri-thumb-up-line'
+  },
+  uncertain: {
+    label: '证据不足/灰区',
+    color: 'bg-amber-100 text-amber-700 border-amber-200',
+    icon: 'ri-question-line'
+  },
+  transfer: {
+    label: '建议转岗',
+    color: 'bg-blue-100 text-blue-700 border-blue-200',
+    icon: 'ri-arrow-left-right-line'
+  }
+};
+
+export default function CandidateDetail({ candidates, candidateId, onBack }: CandidateDetailProps) {
   const [note, setNote] = useState('');
   const [showNoteInput, setShowNoteInput] = useState(false);
-
-  // 模拟候选人数据
-  const candidate = {
-    id: candidateId,
-    name: '张伟',
-    position: '产品经理',
-    status: 'recommend',
-    interviewDate: '2025-01-15',
-    email: 'zhangwei@example.com',
-    phone: '138****5678',
-    abilities: [
-      { name: '学习能力', score: 85, subItems: ['信息理解速度: 90', '核心要点提取: 82', '表达重组能力: 83'] },
-      { name: '自驱力', score: 78, subItems: ['主动性: 80', '目标设定: 75', '自我管理: 79'] },
-      { name: '执行力', score: 82, subItems: ['任务完成度: 85', '时间管理: 80', '结果导向: 81'] },
-      { name: '批判性思维', score: 75, subItems: ['问题分析: 78', '逻辑推理: 73', '创新思维: 74'] },
-      { name: '业务能力', score: 70, subItems: ['业务理解: 72', '专业知识: 68', '实践应用: 70'] }
-    ],
-    evidences: [
-      {
-        ability: '学习能力',
-        behavior: '在即时学习任务中,候选人在2分15秒内完成了材料阅读,速度超过85%的候选人。能够准确识别"共识机制"的核心问题,并用自己的语言进行了清晰表达。',
-        timestamp: '00:03:45',
-        segment: 'learning-task-1'
-      },
-      {
-        ability: '自驱力',
-        behavior: '在开放性问题中,候选人主动提出了3个改进建议,展现出较强的主动性和目标导向思维。表现出对未知领域的探索意愿。',
-        timestamp: '00:15:20',
-        segment: 'motivation-task-1'
-      },
-      {
-        ability: '执行力',
-        behavior: '在情境题中给出了结构化的执行方案,考虑到了潜在风险和应对措施。展现出良好的任务分解和时间管理能力。',
-        timestamp: '00:25:10',
-        segment: 'execution-task-1'
-      }
-    ]
-  };
-
   const [expandedAbility, setExpandedAbility] = useState<string | null>(null);
+
+  const candidate = candidates.find((c) => c.id === candidateId);
+
+  if (!candidate) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors cursor-pointer whitespace-nowrap"
+        >
+          <i className="ri-arrow-left-line"></i>
+          返回候选人列表
+        </button>
+        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+          <p className="text-gray-500">未找到该候选人信息</p>
+        </div>
+      </div>
+    );
+  }
+
+  const status = statusConfig[candidate.status];
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
@@ -76,9 +77,9 @@ export default function CandidateDetail({ candidateId, onBack }: CandidateDetail
                   <p className="text-gray-600">{candidate.position}</p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium border border-teal-200 whitespace-nowrap">
-                <i className="ri-thumb-up-line"></i>
-                推荐进入二面
+              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border whitespace-nowrap ${status.color}`}>
+                <i className={status.icon}></i>
+                {status.label}
               </span>
             </div>
 

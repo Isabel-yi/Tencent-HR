@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import CandidateList from './components/CandidateList';
 import CandidateDetail from './components/CandidateDetail';
+import { candidatesData } from './data/candidates';
 
 export default function HRPage() {
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null);
@@ -38,12 +38,16 @@ export default function HRPage() {
       </nav>
 
       {selectedCandidate ? (
-        <CandidateDetail 
-          candidateId={selectedCandidate} 
-          onBack={() => setSelectedCandidate(null)} 
+        <CandidateDetail
+          candidates={candidatesData}
+          candidateId={selectedCandidate}
+          onBack={() => setSelectedCandidate(null)}
         />
       ) : (
-        <CandidateList onSelectCandidate={setSelectedCandidate} />
+        <CandidateList
+          candidates={candidatesData}
+          onSelectCandidate={setSelectedCandidate}
+        />
       )}
     </div>
   );
