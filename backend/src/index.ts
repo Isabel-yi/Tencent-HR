@@ -39,6 +39,6 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/interview', interviewRoutes);
 
-app.listen(config.port, () => {
-  console.log(`Backend running at http://localhost:${config.port}`);
+app.listen(config.port, '0.0.0.0', () => {
+  console.log(`Backend running on 0.0.0.0:${config.port}`);
 });
