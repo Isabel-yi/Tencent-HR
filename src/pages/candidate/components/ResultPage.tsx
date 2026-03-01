@@ -1,20 +1,34 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import type { InterviewConclusion } from '../../../api/interview';
 
 type ResultType = 'pass' | 'transfer' | 'review';
 
-export default function ResultPage() {
-  const [resultType] = useState<ResultType>('pass');
-  const [expandedAbility, setExpandedAbility] = useState<string | null>(null);
+interface ResultPageProps {
+  conclusion?: InterviewConclusion | null;
+}
 
-  const abilities = [
-    { id: 'learning', name: '学习能力', score: 85, color: 'teal' },
-    { id: 'motivation', name: '自驱力', score: 78, color: 'blue' },
-    { id: 'execution', name: '执行力', score: 82, color: 'indigo' },
-    { id: 'critical', name: '批判性思维', score: 75, color: 'violet' },
-    { id: 'business', name: '业务能力', score: 70, color: 'fuchsia' }
-  ];
+const DEFAULT_ABILITIES = [
+  { id: 'learning', name: '学习能力', score: 85, color: 'teal' },
+  { id: 'motivation', name: '自驱力', score: 78, color: 'blue' },
+  { id: 'execution', name: '执行力', score: 82, color: 'indigo' },
+  { id: 'critical', name: '批判性思维', score: 75, color: 'violet' },
+  { id: 'business', name: '业务能力', score: 70, color: 'fuchsia' }
+];
+
+export default function ResultPage({ conclusion }: ResultPageProps) {
+  const [expandedAbility, setExpandedAbility] = useState<string | null>(null);
+  const resultType: ResultType = conclusion?.resultType ?? 'pass';
+  const summaryText = conclusion?.summary ?? (resultType === 'pass'
+    ? '综合评估显示,你的能力特征与该岗位要求高度匹配,特别是在学习能力和执行力方面表现突出。'
+    : resultType === 'transfer'
+    ? '当前岗位匹配度一般,但你的能力画像更适合其他方向。系统已为你推荐更匹配的岗位,可在下方「其他适合你的岗位」中查看并一键转投。'
+    : '本次评估证据处于灰区,建议由面试官人工复核。你的部分回答较简略或存在网络异常记录,补充说明或重新作答可能有助于更准确评估。');
+  const abilityComments = conclusion?.abilityComments ?? [];
+  const abilities: Array<{ id: string; name: string; score: number; color: string; comment?: string }> =
+    abilityComments.length > 0
+      ? abilityComments.map((a, i) => ({ id: `ability-${i}`, name: a.dimension, score: 0, color: 'teal', comment: a.comment }))
+      : DEFAULT_ABILITIES;
 
   const evidences = [
     {
@@ -103,9 +117,7 @@ export default function ResultPage() {
                     <i className="ri-thumb-up-line text-2xl text-teal-600"></i>
                     <h2 className="text-2xl font-semibold text-teal-900">恭喜!建议进入下一轮</h2>
                   </div>
-                  <p className="text-teal-800 leading-relaxed">
-                    综合评估显示,你的能力特征与该岗位要求高度匹配,特别是在学习能力和执行力方面表现突出。
-                  </p>
+                  <p className="text-teal-800 leading-relaxed">{summaryText}</p>
                 </div>
               )}
               {resultType === 'transfer' && (
@@ -114,9 +126,7 @@ export default function ResultPage() {
                     <i className="ri-arrow-left-right-line text-2xl text-blue-600"></i>
                     <h2 className="text-2xl font-semibold text-blue-900">建议转岗</h2>
                   </div>
-                  <p className="text-blue-800 leading-relaxed">
-                    当前岗位匹配度一般,但你的能力画像更适合其他方向。系统已为你推荐更匹配的岗位,可在下方「其他适合你的岗位」中查看并一键转投。
-                  </p>
+                  <p className="text-blue-800 leading-relaxed">{summaryText}</p>
                 </div>
               )}
               {resultType === 'review' && (
@@ -125,9 +135,7 @@ export default function ResultPage() {
                     <i className="ri-question-line text-2xl text-amber-600"></i>
                     <h2 className="text-2xl font-semibold text-amber-900">待复核</h2>
                   </div>
-                  <p className="text-amber-800 leading-relaxed">
-                    本次评估证据处于灰区,建议由面试官人工复核。你的部分回答较简略或存在网络异常记录,补充说明或重新作答可能有助于更准确评估。
-                  </p>
+                  <p className="text-amber-800 leading-relaxed">{summaryText}</p>
                 </div>
               )}
             </div>
@@ -224,22 +232,23 @@ export default function ResultPage() {
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium text-gray-900">{ability.name}</span>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-teal-600">{ability.score}分</span>
+                        {ability.comment ? null : <span className="text-sm font-semibold text-teal-600">{ability.score}分</span>}
                         <i className={`ri-arrow-${expandedAbility === ability.id ? 'up' : 'down'}-s-line text-gray-400`}></i>
                       </div>
                     </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-teal-500 to-teal-400 rounded-full transition-all duration-500"
-                        style={{ width: `${ability.score}%` }}
-                      ></div>
-                    </div>
+                    {ability.score > 0 && (
+                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-teal-500 to-teal-400 rounded-full transition-all duration-500"
+                          style={{ width: `${ability.score}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
-                  
                   {expandedAbility === ability.id && (
                     <div className="px-4 pb-4 bg-gray-50 border-t border-gray-200">
                       <p className="text-sm text-gray-600 mt-3">
-                        详细的子指标分析将在完整报告中展示...
+                        {ability.comment ?? '详细的子指标分析将在完整报告中展示...'}
                       </p>
                     </div>
                   )}

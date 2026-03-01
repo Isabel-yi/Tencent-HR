@@ -1,18 +1,26 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import InterviewModule from './components/InterviewModule';
 import ResultPage from './components/ResultPage';
+import type { InterviewConclusion } from '../api/interview';
 
 export default function CandidatePage() {
   const [currentView, setCurrentView] = useState<'start' | 'interview' | 'result'>('start');
+  const [interviewConclusion, setInterviewConclusion] = useState<InterviewConclusion | null>(null);
 
   if (currentView === 'interview') {
-    return <InterviewModule onComplete={() => setCurrentView('result')} />;
+    return (
+      <InterviewModule
+        onComplete={(conclusion) => {
+          setInterviewConclusion(conclusion);
+          setCurrentView('result');
+        }}
+      />
+    );
   }
 
   if (currentView === 'result') {
-    return <ResultPage />;
+    return <ResultPage conclusion={interviewConclusion} />;
   }
 
   return (

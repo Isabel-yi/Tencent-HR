@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from 'react';
-
-interface InterviewModuleProps {
-  onComplete: () => void;
-}
+import { evaluateInterview, type InterviewConclusion } from '../../../api/interview';
 
 type ModuleType = 'learning' | 'motivation' | 'execution' | 'business';
+
+interface InterviewModuleProps {
+  onComplete: (conclusion: InterviewConclusion) => void;
+}
 
 const modules = [
   { id: 'learning', name: '学习能力', icon: 'ri-book-open-line' },
@@ -108,6 +108,9 @@ export default function InterviewModule({ onComplete }: InterviewModuleProps) {
   const [timeLeft, setTimeLeft] = useState(180);
   const [isReading, setIsReading] = useState(true);
   const [answer, setAnswer] = useState('');
+  const [collectedAnswers, setCollectedAnswers] = useState<Partial<Record<ModuleType, string>>>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (timeLeft > 0 && isReading) {
@@ -124,15 +127,37 @@ export default function InterviewModule({ onComplete }: InterviewModuleProps) {
 
   const moduleOrder: ModuleType[] = ['learning', 'motivation', 'execution', 'business'];
 
-  const handleSubmit = () => {
+  const buildEvaluatePayload = () => {
+    return moduleOrder.map((moduleId) => ({
+      module: moduleId,
+      moduleName: modules.find((m) => m.id === moduleId)!.name,
+      material: moduleContents[moduleId].material,
+      question: moduleContents[moduleId].question,
+      userAnswer: moduleId === currentModule ? answer : (collectedAnswers[moduleId] ?? ''),
+    }));
+  };
+
+  const handleSubmit = async () => {
     const currentIndex = moduleOrder.indexOf(currentModule);
     if (currentIndex < moduleOrder.length - 1) {
+      setCollectedAnswers((prev) => ({ ...prev, [currentModule]: answer }));
       setCurrentModule(moduleOrder[currentIndex + 1]);
       setTimeLeft(180);
       setIsReading(true);
       setAnswer('');
+      setError(null);
     } else {
-      onComplete();
+      setError(null);
+      setLoading(true);
+      try {
+        const payload = buildEvaluatePayload();
+        const conclusion = await evaluateInterview(payload);
+        onComplete(conclusion);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '评估服务暂时不可用，请稍后重试');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -285,19 +310,30 @@ export default function InterviewModule({ onComplete }: InterviewModuleProps) {
                   className="w-full h-80 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-700 text-sm"
                 />
 
+                {error && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                    {error}
+                  </div>
+                )}
                 <div className="mt-4 flex items-center justify-between">
                   <div className="text-sm text-gray-500">已输入 {answer.length} 字</div>
                   <button
-                    onClick={handleSubmit}
-                    disabled={answer.length < 50}
+                    onClick={() => void handleSubmit()}
+                    disabled={answer.length < 50 || loading}
                     className={`px-8 py-3 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${
-                      answer.length >= 50
+                      answer.length >= 50 && !loading
                         ? 'bg-teal-600 text-white hover:bg-teal-700 hover:shadow-lg'
                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    {currentModule === 'business' ? '完成面试' : '提交并继续'}
-                    <i className={`${currentModule === 'business' ? 'ri-check-line' : 'ri-arrow-right-line'} ml-2`}></i>
+                    {loading ? (
+                      'AI 面试官评估中...'
+                    ) : (
+                      <>
+                        {currentModule === 'business' ? '完成面试' : '提交并继续'}
+                        <i className={`${currentModule === 'business' ? 'ri-check-line' : 'ri-arrow-right-line'} ml-2`}></i>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
